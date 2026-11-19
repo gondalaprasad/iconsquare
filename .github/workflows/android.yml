@@ -1,0 +1,52 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install packages
+        run: npm install
+
+      - name: App icon (uses assets/icon.png if you add one, otherwise makes a plain one)
+        run: |
+          mkdir -p assets
+          if [ ! -f assets/icon.png ]; then
+            convert -size 1024x1024 xc:'#282c3f' -gravity center -fill white -pointsize 280 -annotate 0 'ICON' assets/icon.png
+          fi
+
+      - name: Create the Android project
+        run: npx cap add android
+
+      - name: Generate icons and splash
+        run: npx @capacitor/assets generate --android
+
+      - name: Sync config
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: iconsquare-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
