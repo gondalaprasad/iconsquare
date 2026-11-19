@@ -26,9 +26,14 @@ jobs:
       - name: App icon (uses assets/icon.png if you add one, otherwise makes a plain one)
         run: |
           mkdir -p assets
-          if [ ! -f assets/icon.png ]; then
-            convert -size 1024x1024 xc:'#282c3f' -gravity center -fill white -pointsize 280 -annotate 0 'ICON' assets/icon.png
-          fi
+          cat > /tmp/icon.js <<'EOF'
+          const fs = require('fs');
+          if (fs.existsSync('assets/icon.png')) process.exit(0);
+          const sharp = require('sharp');
+          const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><rect width="1024" height="1024" fill="#282c3f"/><rect x="262" y="262" width="500" height="500" rx="90" fill="none" stroke="#ffffff" stroke-width="56"/><rect x="462" y="462" width="100" height="100" fill="#ff3f6c"/></svg>';
+          sharp(Buffer.from(svg)).png().toFile('assets/icon.png').then(() => console.log('icon made'));
+          EOF
+          NODE_PATH="$PWD/node_modules" node /tmp/icon.js
 
       - name: Create the Android project
         run: npx cap add android
