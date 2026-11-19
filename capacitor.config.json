@@ -1,0 +1,11 @@
+{
+  "appId": "store.iconsquare.app",
+  "appName": "ICON Square",
+  "webDir": "www",
+  "server": {
+    "url": "https://iconsquare.store",
+    "cleartext": false,
+    "allowNavigation": ["iconsquare.store", "*.iconsquare.store", "checkout.razorpay.com", "api.razorpay.com", "*.razorpay.com"]
+  },
+  "android": { "allowMixedContent": false }
+}
